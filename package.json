@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/fileManager.js"
+    "start": "node src/start.js"
   },
   "repository": {
     "type": "git",
