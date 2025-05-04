@@ -1,5 +1,5 @@
 import { stdin, stdout } from 'node:process';
-import { up, changeDirectory, listFiles } from './runCommands.js';
+import { up, changeDirectory, listFiles, readFile, addFile, createDirectory, renameFile, copyFile, moveFile, removeFile } from './runCommands.js';
 import { userName, log } from './start.js';
 
 
@@ -48,28 +48,22 @@ export function fileManager() {
         } else if (command === 'ls') {
             await listFiles();
         } else if (command.startsWith('cat ')) {
-            const fileName = command.split(' ')[1];
-            log(`Reading file ${fileName}...`);
+            const fileName = command.split(' ')[1];            
             await readFile(fileName);
         } else if (command.startsWith('add ')) {
             const fileName = command.split(' ')[1];
-            log(`Adding file ${fileName}...`);
             await addFile(fileName);
         } else if (command.startsWith('mkdir ')) {
             const dirName = command.split(' ')[1];
-            log(`Creating directory ${dirName}...`);
             await createDirectory(dirName);
         } else if (command.startsWith('rn ')) {
             const [oldName, newName] = command.split(' ').slice(1);
-            log(`Renaming file from ${oldName} to ${newName}...`);
             await renameFile(oldName, newName);
         } else if (command.startsWith('cp ')) {
             const [source, destination] = command.split(' ').slice(1);
-            log(`Copying file from ${source} to ${destination}...`);
             await copyFile(source, destination);
         } else if (command.startsWith('mv ')) {
             const [source, destination] = command.split(' ').slice(1);
-            log(`Moving file from ${source} to ${destination}...`);
             await moveFile(source, destination);
         } else if (command.startsWith('rm ')) {
             const fileName = command.split(' ')[1];
