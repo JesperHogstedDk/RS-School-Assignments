@@ -18,12 +18,17 @@ export function fileManager() {
             historySize: 10
         });
         rl.prompt();
-        rl.on('line', (line) => {
-            if (line.trim() === '.exit') {
-                rl.close();
-            } else {
-                parseCommand(line.trim());
-                showWorkingDir();
+        rl.on('line', async (line) => { 
+            try {
+                if (line.trim() === '.exit') {
+                    rl.close();
+                } else {
+                    await parseCommand(line.trim()); 
+                    showWorkingDir();
+                }
+            } catch (error) {
+                log(`Error: ${error.message}`);
+            } finally {
                 rl.prompt();
             }
         });
@@ -41,7 +46,6 @@ export function fileManager() {
             const dir = command.split(' ')[1];
             await changeDirectory(dir);
         } else if (command === 'ls') {
-            log('Listing files...');
             await listFiles();
         } else if (command.startsWith('cat ')) {
             const fileName = command.split(' ')[1];
