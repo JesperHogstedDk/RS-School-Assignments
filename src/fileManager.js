@@ -1,9 +1,18 @@
 import { stdin, stdout } from 'node:process';
-import { up, changeDirectory, listFiles, readFile, addFile, createDirectory, renameFile, copyFile, moveFile, removeFile, hashFile, brotliCompress, brotliDecompress } from './runCommands.js';
+import { up, changeDirectory, listFiles, readFile, addFile, createDirectory, renameFile, copyFile, moveFile, removeFile, hashFile, brotliCompress, brotliDecompress, showHelp } from './runCommands.js';
 import { userName, log } from './start.js';
 import os from 'node:os';
 
 export function fileManager() {
+
+    function setStartupWorkingDirectory() {
+        const startupDir = os.homedir();
+        try {
+            process.chdir(startupDir);
+        } catch (error) {
+            log(`Error setting startup working directory: ${error.message}`);
+        }   
+    }
 
     function showWorkingDir() {
         log(`You are currently in ${process.cwd()}`);
@@ -14,7 +23,7 @@ export function fileManager() {
         const rl = createInterface({
             input: stdin,
             output: stdout,
-            prompt: '> ',
+            prompt: 'Enter command > ',
             historySize: 10
         });
         rl.prompt();
@@ -68,15 +77,15 @@ export function fileManager() {
         } else if (command.startsWith('rm ')) {
             const fileName = command.split(' ')[1];
             await removeFile(fileName);
-        } else if (command === 'os-eol') {
+        } else if (command === 'os --EOL') {
             log(`End of line character: ${JSON.stringify(os.EOL)}`);
-        } else if (command === 'os-cpus') {
-            log(`Number of CPUs: ${os.cpus().length}`);
-        } else if (command === 'os-homedir') {
+        } else if (command === 'os --cpus') {
+            log(`CPU Info: ${JSON.stringify(os.cpus(), null, 2)}`);
+        } else if (command === 'os --homedir') {
             log(`Home directory: ${os.homedir()}`);
-        } else if (command === 'os-username') {
+        } else if (command === 'os --username') {
             log(`Username: ${os.userInfo().username}`);
-        } else if (command === 'os-architecture') {
+        } else if (command === 'os --architecture') {
             log(`Os architecture: ${os.arch()}`);
         } else if (command.startsWith('hash ')) {
             const fileName = command.split(' ')[1];
@@ -88,14 +97,21 @@ export function fileManager() {
         } else if (command.startsWith('decompress ')) {
             const fileName = command.split(' ')[1];
             const destinationFilename = command.split(' ')[2];
-            await brotliDecompress(fileName, destinationFilename);
+            await brotliDecompress(fileName, destinationFilename);            
+        } else if(command === 'help') {
+            log('Empty command!');
+            await showHelp();
+        }
+        else {
+            log(`Invalid input: ${command}. Type help for available commands.`);
         }
     }
 
     async function start() {
         log(`Welcome to the File Manager, ${userName}!`)
         log('Press CTRL+C or type .exit to end File Manager!');
-        log('Available commands: up, cd, ls, cat, add, mkdir, rn, cp, mv, rm, os-eol, os-cpus, os-homedir, os-username, os-architechture, hash, compress, decompress, .exit');
+        log('Available commands: up, cd, ls, cat, add, mkdir, rn, cp, mv, rm, os --EOL, os --cpus, os --homedir, os --username, os --architechture, hash, compress, decompress, .exit');
+        setStartupWorkingDirectory();
         showWorkingDir();
         await createPrompt();
     }
