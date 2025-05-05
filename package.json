@@ -1,0 +1,24 @@
+{
+  "name": "rs-school-assignments",
+  "version": "1.0.0",
+  "description": "Your task is to implement File Manager using Node.js APIs.",
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/start.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JesperHogstedDk/RS-School-Assignments.git"
+  },
+  "keywords": [],
+  "author": "JesperHogstedDk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JesperHogstedDk/RS-School-Assignments/issues"
+  },
+  "homepage": "https://github.com/JesperHogstedDk/RS-School-Assignments#readme"
+}
