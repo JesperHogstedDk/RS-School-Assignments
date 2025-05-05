@@ -1,7 +1,7 @@
 import { stdin, stdout } from 'node:process';
-import { up, changeDirectory, listFiles, readFile, addFile, createDirectory, renameFile, copyFile, moveFile, removeFile } from './runCommands.js';
+import { up, changeDirectory, listFiles, readFile, addFile, createDirectory, renameFile, copyFile, moveFile, removeFile, hashFile, brotliCompress, brotliDecompress } from './runCommands.js';
 import { userName, log } from './start.js';
-
+import os from 'node:os';
 
 export function fileManager() {
 
@@ -18,12 +18,12 @@ export function fileManager() {
             historySize: 10
         });
         rl.prompt();
-        rl.on('line', async (line) => { 
+        rl.on('line', async (line) => {
             try {
                 if (line.trim() === '.exit') {
                     rl.close();
                 } else {
-                    await parseCommand(line.trim()); 
+                    await parseCommand(line.trim());
                     showWorkingDir();
                 }
             } catch (error) {
@@ -48,7 +48,7 @@ export function fileManager() {
         } else if (command === 'ls') {
             await listFiles();
         } else if (command.startsWith('cat ')) {
-            const fileName = command.split(' ')[1];            
+            const fileName = command.split(' ')[1];
             await readFile(fileName);
         } else if (command.startsWith('add ')) {
             const fileName = command.split(' ')[1];
@@ -67,16 +67,28 @@ export function fileManager() {
             await moveFile(source, destination);
         } else if (command.startsWith('rm ')) {
             const fileName = command.split(' ')[1];
-            log(`Removing file ${fileName}...`);
             await removeFile(fileName);
         } else if (command === 'os-eol') {
-            log(`End of line character: ${os.EOL}`);
+            log(`End of line character: ${JSON.stringify(os.EOL)}`);
         } else if (command === 'os-cpus') {
             log(`Number of CPUs: ${os.cpus().length}`);
         } else if (command === 'os-homedir') {
             log(`Home directory: ${os.homedir()}`);
         } else if (command === 'os-username') {
             log(`Username: ${os.userInfo().username}`);
+        } else if (command === 'os-architecture') {
+            log(`Os architecture: ${os.arch()}`);
+        } else if (command.startsWith('hash ')) {
+            const fileName = command.split(' ')[1];
+            await hashFile(fileName);
+        } else if (command.startsWith('compress ')) {
+            const fileName = command.split(' ')[1];
+            const destinationFilename = command.split(' ')[2];
+            await brotliCompress(fileName,destinationFilename);
+        } else if (command.startsWith('decompress ')) {
+            const fileName = command.split(' ')[1];
+            const destinationFilename = command.split(' ')[2];
+            await brotliDecompress(fileName, destinationFilename);
         }
     }
 

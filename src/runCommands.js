@@ -1,8 +1,10 @@
 import { table } from 'node:console';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
+import { createBrotliCompress, createBrotliDecompress } from 'node:zlib';
 import { log } from './start.js';
 
 export async function up() {
@@ -58,7 +60,7 @@ export async function readFile(fileName) {
         const readStream = fs.createReadStream(filePath, { encoding: 'utf8' });
 
         readStream.on('data', (chunk) => {
-            log(chunk); 
+            log(chunk);
         });
 
         readStream.on('end', () => {
@@ -132,7 +134,7 @@ export async function moveFile(source, destination) {
             fs.createReadStream(sourcePath),
             fs.createWriteStream(destinationPath)
         );
-        await fsPromises.unlink(sourcePath); 
+        await fsPromises.unlink(sourcePath);
         log(`File moved from ${source} to ${destination} successfully.`);
     } catch (error) {
         log(`${error.message}`);
@@ -143,9 +145,70 @@ export async function removeFile(fileName) {
     try {
         const filePath = path.join(process.cwd(), fileName);
         await fsPromises.unlink(filePath);
-        log(`File ${fileName} deleted successfully.`);  
+        log(`File ${fileName} deleted successfully.`);
     }
     catch (error) {
         log(`Failed to delete file: ${error.message}`);
+    }
+}
+
+export async function hashFile(fileName) {
+    const filePath = path.join(process.cwd(), fileName);
+
+    try {
+        const hash = createHash('sha256');
+        const readStream = fs.createReadStream(filePath);
+
+        await new Promise((resolve, reject) => {
+            readStream.on('data', (chunk) => {
+                hash.update(chunk);
+            });
+
+            readStream.on('end', () => {
+                const digest = hash.digest('hex');
+                log(`Hash of file ${fileName}: ${digest}`);
+                resolve();
+            });
+
+            readStream.on('error', (error) => {
+                log(`Failed to read file: ${error.message}`);
+                reject(error);
+            });
+        });
+    } catch (error) {
+        log(`Failed to hash file: ${error.message}`);
+    }
+}
+
+export async function brotliCompress(fileName, destinationFilename) {
+    const filePath = path.join(process.cwd(), fileName);
+    const compressedFilePath = `${destinationFilename}.gz`;    
+
+    try {
+        const gzip = createBrotliCompress();
+        const sourceStream = fs.createReadStream(filePath);
+        const destinationStream = fs.createWriteStream(compressedFilePath);
+
+        await pipeline(sourceStream, gzip, destinationStream);
+        log(`File ${fileName} Brotli compressed to ${compressedFilePath} successfully.`);
+    } catch (error) {
+        log(`Failed to compress file: ${error.message}`);
+    }
+}
+
+export async function brotliDecompress(fileName, destinationFilename) {
+    const filePath = path.join(process.cwd(), fileName);
+    const decompressedFilePath = `${destinationFilename}`;
+    // const decompressedFilePath = `${destinationFilename}.gz`;
+
+    try {
+        const brotliUnZip = createBrotliDecompress();
+        const sourceStream = fs.createReadStream(filePath);
+        const destinationStream = fs.createWriteStream(decompressedFilePath);
+
+        await pipeline(sourceStream, brotliUnZip, destinationStream);
+        log(`File ${fileName} decompressed to ${decompressedFilePath} successfully.`);
+    } catch (error) {
+        log(`Failed to decompress file: ${error.message}`);
     }
 }
